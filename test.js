@@ -4,20 +4,24 @@ const options = { host: 'localhost', port: process.env.PORT || 3000, path: '/' }
 
 http.get(options, res => {
   let body = '';
-  res.on('data', d => body += d);
+  res.on('data', chunk => body += chunk);
   res.on('end', () => {
     try {
       const json = JSON.parse(body);
-      if (json.message) {
-        console.log('OK');
+      if (json.message && json.message.includes('Hello')) {
+        console.log(' Test passed');
         process.exit(0);
       } else {
-        console.error('Bad response');
+        console.error(' Test failed: unexpected response');
         process.exit(1);
       }
-    } catch (e) {
-      console.error('Not JSON');
+    } catch (err) {
+      console.error(' Not JSON or parse error:', err.message);
       process.exit(1);
     }
   });
-}).on('error', e => { console.error(e); process.exit(1); });
+}).on('error', err => {
+  console.error(' Connection error:', err.message);
+  process.exit(1);
+});
+
