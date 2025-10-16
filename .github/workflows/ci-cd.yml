@@ -20,8 +20,19 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Run tests
-        run: npm test
+      - name: Run tests (start server, test, stop)
+        run: |
+          echo " Starting server..."
+          npm start &
+          SERVER_PID=$!
+          echo "Waiting for server to start..."
+          sleep 10
+          echo " Running tests..."
+          npm test
+          TEST_RESULT=$?
+          echo "Stopping server..."
+          kill $SERVER_PID || true
+          exit $TEST_RESULT
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
